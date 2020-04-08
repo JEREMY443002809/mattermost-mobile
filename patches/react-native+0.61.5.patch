@@ -20,9 +20,18 @@ index 7dffc17..548e7bb 100644
    horizontallyInverted: {
      transform: [{scaleX: -1}],
 diff --git a/node_modules/react-native/Libraries/WebSocket/NativeWebSocketModule.js b/node_modules/react-native/Libraries/WebSocket/NativeWebSocketModule.js
-index da2c57f..6849158 100644
+index da2c57f..50ccc51 100644
 --- a/node_modules/react-native/Libraries/WebSocket/NativeWebSocketModule.js
 +++ b/node_modules/react-native/Libraries/WebSocket/NativeWebSocketModule.js
+@@ -17,7 +17,7 @@ export interface Spec extends TurboModule {
+   +connect: (
+     url: string,
+     protocols: ?Array<string>,
+-    options: ?{headers?: {origin?: string}},
++    options: ?{headers?: {origin?: string}, trustSSL?: boolean},
+     socketID: number,
+   ) => void;
+   +send: (message: string, socketID: number) => void;
 @@ -31,5 +31,5 @@ export interface Spec extends TurboModule {
  }
  
@@ -177,15 +186,23 @@ index d9387c4..93481be 100644
    webSocket.delegate = self;
    webSocket.reactTag = socketID;
 diff --git a/node_modules/react-native/Libraries/WebSocket/WebSocket.js b/node_modules/react-native/Libraries/WebSocket/WebSocket.js
-index 35f0757..a0205fc 100644
+index 35f0757..73c31b1 100644
 --- a/node_modules/react-native/Libraries/WebSocket/WebSocket.js
 +++ b/node_modules/react-native/Libraries/WebSocket/WebSocket.js
-@@ -92,7 +92,7 @@ class WebSocket extends (EventTarget(...WEBSOCKET_EVENTS): any) {
+@@ -85,14 +85,14 @@ class WebSocket extends (EventTarget(...WEBSOCKET_EVENTS): any) {
+   constructor(
+     url: string,
+     protocols: ?string | ?Array<string>,
+-    options: ?{headers?: {origin?: string}},
++    options: ?{headers?: {origin?: string}, trustSSL?: boolean},
+   ) {
+     super();
+     if (typeof protocols === 'string') {
        protocols = [protocols];
      }
  
 -    const {headers = {}, ...unrecognized} = options || {};
-+    const {headers = {}, certificate = {}, ...unrecognized} = options || {};
++    const {headers = {}, certificate = {}, trustSSL = false, ...unrecognized} = options || {};
  
      // Preserve deprecated backwards compatibility for the 'origin' option
      /* $FlowFixMe(>=0.68.0 site=react_native_fb) This comment suppresses an
@@ -194,7 +211,7 @@ index 35f0757..a0205fc 100644
      this._socketId = nextWebSocketId++;
      this._registerEvents();
 -    NativeWebSocketModule.connect(url, protocols, {headers}, this._socketId);
-+    NativeWebSocketModule.connect(url, protocols, {headers, certificate}, this._socketId);
++    NativeWebSocketModule.connect(url, protocols, {headers, trustSSL, certificate}, this._socketId);
    }
  
    get binaryType(): ?BinaryType {
