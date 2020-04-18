@@ -10,6 +10,7 @@ import {Client4} from '@mm-redux/client';
 
 import CustomPropTypes from 'app/constants/custom_prop_types';
 import {changeOpacity, makeStyleSheetFromTheme} from 'app/utils/theme';
+import EphemeralStore from 'app/store/ephemeral_store';
 
 const AnimatedImageBackground = Animated.createAnimatedComponent(ImageBackground);
 const AnimatedImage = Animated.createAnimatedComponent(FastImage);
@@ -75,10 +76,15 @@ export default class ProgressiveImage extends PureComponent {
 
     load = () => {
         const {imageUri, thumbnailUri} = this.props;
-        const headers = {Authorization: `Bearer ${Client4.getToken()}`};
 
         if (thumbnailUri && imageUri) {
-            FastImage.preload([{uri: imageUri, headers}]);
+            // Only preload file attachment images if host has SSL correctly configured
+            if (EphemeralStore.trustedSslHost === null) {
+                const headers = {Authorization: `Bearer ${Client4.getToken()}`};
+                FastImage.preload([{uri: imageUri, headers}]);
+            } else {
+                this.setImage(imageUri);
+            }
             this.setThumbnail(thumbnailUri);
         } else if (imageUri) {
             this.setImage(imageUri);
