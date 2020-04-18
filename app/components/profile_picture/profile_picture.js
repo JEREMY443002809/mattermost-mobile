@@ -11,6 +11,7 @@ import {Client4} from '@mm-redux/client';
 
 import UserStatus from 'app/components/user_status';
 import {changeOpacity, makeStyleSheetFromTheme} from 'app/utils/theme';
+import {isTrustedHost} from 'app/utils/network';
 
 import placeholder from 'assets/images/profile.jpg';
 
@@ -155,6 +156,7 @@ export default class ProfilePicture extends PureComponent {
                     key={pictureUrl}
                     style={{width: this.props.size, height: this.props.size, borderRadius: this.props.size / 2}}
                     source={source}
+                    trustSSL={isTrustedHost()}
                 />
             );
         } else {
